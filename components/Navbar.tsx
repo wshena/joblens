@@ -6,11 +6,15 @@ import { NavLinks } from "@/const";
 import Link from "next/link";
 import UserProfileButton from "./buttons/UserProfileButton";
 import Button from "./buttons/Button";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 const Navbar = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const user = useAuthStore((state) => state.user);
+
+  const isLinkActive = (path: string) => path === pathname;
 
   return (
     <header className="fixed top-0 left-0 w-full bg-white text-black font-md">
@@ -26,7 +30,12 @@ const Navbar = () => {
                 <Link
                   aria-label={link.label}
                   href={link.link}
-                  className="font-bold text-gray-600 hover:text-gray-900 transition-colors duration-300"
+                  className={cn(
+                    "pb-1",
+                    "capitalize font-bold text-gray-600 hover:text-gray-900",
+                    "transition-colors duration-300",
+                    isLinkActive(link.link) && "border-b-3 border-b-green-600",
+                  )}
                 >
                   {link.title}
                 </Link>
@@ -46,14 +55,14 @@ const Navbar = () => {
                   size="sm"
                   label="Masuk"
                   variant="outline"
-                  className="border-blue-600 text-blue-600"
+                  className="border-green-600 text-green-600"
                 />
                 <Button
                   onClick={() => router.push("/auth/register")}
                   size="sm"
                   label="Daftar"
                   variant="primary"
-                  className="bg-blue-600 text-white hover:bg-blue-600"
+                  className="bg-green-600 text-white hover:bg-green-600"
                 />
               </div>
             )}
