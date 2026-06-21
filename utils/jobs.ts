@@ -2,6 +2,11 @@ import axios from "axios";
 
 // ─── Unified Job type ────────────────────────────────────────────────────────
 
+export interface TagWithCount {
+  name: string;
+  count: number;
+}
+
 export interface Job {
   id: string;
   title: string;
@@ -166,4 +171,34 @@ export const getFilteredJobByTags = async (
       hasNextPage: hasNextPage,
     },
   };
+};
+
+// get random tags with count
+export const getRandomTagsWithCount = async (
+  limitCount: number = 6,
+): Promise<TagWithCount[]> => {
+  const response = await axios.get<ArbeitnowResponse>(ARBEITNOW_BASE);
+  const jobs = response?.data?.data || [];
+
+  const tagCounts: Record<string, number> = {};
+
+  jobs.forEach((job) => {
+    job.tags?.forEach((tag) => {
+      const normalizedTag = tag.trim();
+      if (normalizedTag) {
+        tagCounts[normalizedTag] = (tagCounts[normalizedTag] || 0) + 1;
+      }
+    });
+  });
+
+  const allTagsWithCount: TagWithCount[] = Object.keys(tagCounts).map(
+    (tagName) => ({
+      name: tagName,
+      count: tagCounts[tagName],
+    }),
+  );
+
+  const shuffledTags = allTagsWithCount.sort(() => 0.5 - Math.random());
+
+  return shuffledTags.slice(0, limitCount);
 };
