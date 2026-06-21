@@ -82,6 +82,7 @@ const ARBEITNOW_BASE = process.env.ARBEITNOW_BASE_API_URL!;
 
 export interface GetJobsParams {
   page?: number;
+  limit?: number;
   search?: string;
   tags?: string;
   remote?: boolean;
@@ -92,9 +93,9 @@ export const getJobs = async (
   params: GetJobsParams = {},
 ): Promise<JobsResponse> => {
   const query: Record<string, string> = {};
+
   if (params.page) query.page = String(params.page);
   if (params.search) query.search = params.search;
-  if (params.tags) query.tags = params.tags;
   if (params.remote !== undefined) query.remote = String(params.remote);
   if (params.visaSponsorship !== undefined)
     query.visa_sponsorship = String(params.visaSponsorship);
@@ -103,14 +104,25 @@ export const getJobs = async (
     params: query,
   });
 
-  const { data, meta } = response.data;
+  const rawJobs = response.data.data || [];
+  const metaAPI = response.data.meta;
+
+  const page = params.page || 1;
+  const limit = params.limit || 10;
+
+  const startIndex = (page - 1) * limit;
+  const endIndex = startIndex + limit;
+  const paginatedRawJobs = rawJobs.slice(startIndex, endIndex);
+
+  const totalItems = metaAPI?.total || rawJobs.length;
 
   return {
-    data: data?.map(normalizeArbeitnow),
-    total: data?.length,
+    data: paginatedRawJobs.map(normalizeArbeitnow),
+    total: totalItems,
     meta: {
-      currentPage: meta?.current_page!,
-      hasNextPage: meta?.current_page! < meta?.last_page!,
+      currentPage: page,
+      hasNextPage:
+        endIndex < rawJobs.length || metaAPI?.current_page < metaAPI?.last_page,
     },
   };
 };
@@ -125,6 +137,8 @@ export const getJobTags = async (): Promise<string[]> => {
 // filter job list menggunakan tags
 export const getFilteredJobByTags = async (
   tag: string,
+  page: number = 1,
+  limit: number = 10,
 ): Promise<JobsResponse> => {
   const response = await axios.get<ArbeitnowResponse>(ARBEITNOW_BASE);
   const jobs = response?.data?.data || [];
@@ -135,12 +149,21 @@ export const getFilteredJobByTags = async (
     job.tags?.some((t) => t.toLowerCase() === searchTag),
   );
 
+  const totalItems = filteredRawJobs.length;
+
+  const startIndex = (page - 1) * limit;
+  const endIndex = startIndex + limit;
+
+  const paginatedRawJobs = filteredRawJobs.slice(startIndex, endIndex);
+
+  const hasNextPage = endIndex < totalItems;
+
   return {
-    data: filteredRawJobs.map(normalizeArbeitnow),
-    total: filteredRawJobs?.length,
+    data: paginatedRawJobs.map(normalizeArbeitnow),
+    total: totalItems,
     meta: {
-      currentPage: response.data.meta?.current_page || 1,
-      hasNextPage: false,
+      currentPage: page,
+      hasNextPage: hasNextPage,
     },
   };
 };

@@ -5,14 +5,20 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const tagParam = searchParams.get("tags")?.toLowerCase();
 
+  const page = searchParams.get("page") ? Number(searchParams.get("page")) : 1;
+  const limit = searchParams.get("limit")
+    ? Number(searchParams.get("limit"))
+    : 10;
+
   try {
     let jobs;
 
     if (tagParam) {
-      jobs = await getFilteredJobByTags(tagParam);
+      jobs = await getFilteredJobByTags(tagParam, page, limit);
     } else {
       jobs = await getJobs({
-        page: searchParams.get("page") ? Number(searchParams.get("page")) : 1,
+        page: page,
+        limit: limit,
         search: searchParams.get("search") ?? undefined,
         remote: searchParams.get("remote") === "true" ? true : undefined,
         visaSponsorship:
