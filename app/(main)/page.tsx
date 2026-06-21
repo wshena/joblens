@@ -1,20 +1,25 @@
+import TagCard from "@/components/cards/TagCard";
 import ContentContainer from "@/components/container/ContentContainer";
-import { getJobs, getJobTags } from "@/utils/jobs";
+import { getRandomTagsWithCount } from "@/utils/jobs";
 
 export default async function Home() {
-  const [{ data: jobs }, tags] = await Promise.all([
-    getJobs({ page: 1 }),
-    getJobTags(),
-  ]);
-
-  // console.log("Jobs count:", jobs.length);
-  // console.log("Jobs:", jobs.slice(0, 2));
-  // console.log("Tags:", tags);
+  const randomJobTags = await getRandomTagsWithCount(6);
 
   return (
     <main className="w-full pt-10 md:pt-20 bg-white text-black">
       <ContentContainer>
-        <h1>hello world</h1>
+        <section className="space-y-5">
+          <h1 className="capitalize text-md md:text-lg xl:text-xl">
+            Cari perkerjaan berdasarkan tag populer
+          </h1>
+          <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            {randomJobTags.map((tagObj) => (
+              <li className="" key={tagObj.name}>
+                <TagCard tag={tagObj.name} count={tagObj.count} />
+              </li>
+            ))}
+          </ul>
+        </section>
       </ContentContainer>
     </main>
   );
