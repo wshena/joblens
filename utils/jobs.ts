@@ -19,6 +19,7 @@ export interface Job {
 
 export interface JobsResponse {
   data: Job[];
+  total: number;
   meta: {
     currentPage: number;
     hasNextPage: boolean;
@@ -77,6 +78,7 @@ const normalizeArbeitnow = (job: ArbeitnowJob): Job => ({
 // ─── API functions (server-side safe) ────────────────────────────────────────
 
 const ARBEITNOW_BASE = process.env.ARBEITNOW_BASE_API_URL!;
+// const REMOTIVE_BASE = process.env.REMOTIVE_BASE_API_URL!;
 
 export interface GetJobsParams {
   page?: number;
@@ -104,10 +106,11 @@ export const getJobs = async (
   const { data, meta } = response.data;
 
   return {
-    data: data.map(normalizeArbeitnow),
+    data: data?.map(normalizeArbeitnow),
+    total: data?.length,
     meta: {
-      currentPage: meta.current_page,
-      hasNextPage: meta.current_page < meta.last_page,
+      currentPage: meta?.current_page!,
+      hasNextPage: meta?.current_page! < meta?.last_page!,
     },
   };
 };
@@ -117,4 +120,27 @@ export const getJobTags = async (): Promise<string[]> => {
   const response = await axios.get<ArbeitnowResponse>(ARBEITNOW_BASE);
   const allTags = response.data.data.flatMap((job) => job.tags);
   return [...new Set(allTags)].sort();
+};
+
+// filter job list menggunakan tags
+export const getFilteredJobByTags = async (
+  tag: string,
+): Promise<JobsResponse> => {
+  const response = await axios.get<ArbeitnowResponse>(ARBEITNOW_BASE);
+  const jobs = response?.data?.data || [];
+
+  const searchTag = tag.toLowerCase();
+
+  const filteredRawJobs = jobs.filter((job) =>
+    job.tags?.some((t) => t.toLowerCase() === searchTag),
+  );
+
+  return {
+    data: filteredRawJobs.map(normalizeArbeitnow),
+    total: filteredRawJobs?.length,
+    meta: {
+      currentPage: response.data.meta?.current_page || 1,
+      hasNextPage: false,
+    },
+  };
 };

@@ -2,14 +2,14 @@ import ContentContainer from "@/components/container/ContentContainer";
 import { getJobs, getJobTags } from "@/utils/jobs";
 
 export default async function Home() {
-  // Fetch paralel — lebih cepat
   const [{ data: jobs }, tags] = await Promise.all([
     getJobs({ page: 1 }),
     getJobTags(),
   ]);
 
-  console.log("Jobs count:", jobs.length);
-  console.log("Tags:", tags);
+  // console.log("Jobs count:", jobs.length);
+  // console.log("Jobs:", jobs.slice(0, 2));
+  // console.log("Tags:", tags);
 
   return (
     <main className="w-full pt-10 md:pt-20 bg-white text-black">
