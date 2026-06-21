@@ -1,8 +1,8 @@
 export const NavLinks: NavLink[] = [
   {
-    id: "home",
-    title: "Home",
-    label: "Home",
+    id: "find jobs",
+    title: "find jobs",
+    label: "find jobs",
     link: "/",
   },
   {
