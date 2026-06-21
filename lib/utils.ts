@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import slugify from "slugify";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -19,8 +20,15 @@ export function getRandomElements<T>(arr: T[], count: number): T[] {
   return shuffled.slice(0, count);
 }
 
-// export const createSlug = (input: string) =>
-//   slugify(input, { lower: true, strict: true });
+export const createSlug = (input: string) =>
+  slugify(input, { lower: true, strict: true });
+
+export const unslugify = (slug: string): string => {
+  return slug
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+};
 
 // Fungsi untuk mengambil nilai nested dari object berdasarkan path
 export function getValueByPath(object: unknown, path: string): unknown {
