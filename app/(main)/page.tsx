@@ -3,7 +3,7 @@ import ContentContainer from "@/components/container/ContentContainer";
 import { getRandomTagsWithCount } from "@/utils/jobs";
 
 export default async function Home() {
-  const randomJobTags = await getRandomTagsWithCount(6);
+  const randomJobTags = await getRandomTagsWithCount(8);
 
   return (
     <main className="w-full pt-10 md:pt-20 bg-white text-black">
